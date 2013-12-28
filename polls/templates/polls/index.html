@@ -1,0 +1,11 @@
+{% if latest_poll_list %}
+  <ul>
+  {% for poll in latest_poll_list %}
+  <!-- Used to be "/polls/{{ poll.id }}/" -->
+  <!-- The new way is more flexible as it isn't hardcoded. It works by looking at the URL named 'detail' inside polls namespace.. -->
+  <li><a href="{% url 'polls:detail' poll.id %}">{{ poll.question }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No polls are available.</p>
+{% endif %}
