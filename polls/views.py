@@ -3,6 +3,7 @@ from polls.models import Poll,Choice
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.utils import timezone
+from django.db.models import Count
 #These imports are needed if you are not using the shortcut.
 from django.http import HttpResponse,Http404,HttpResponseRedirect
 #from django.template import RequestContext,loader
@@ -55,11 +56,10 @@ class IndexView(generic.ListView):
     #New get_queryset() method.
     """
     Return the last 5 published polls(Not including those to be published
-    in the future.
+    in the future) that have at least 2 choices
     """
-    return Poll.objects.filter(
-        pub_date__lte=timezone.now()
-        ).order_by('-pub_date')[:5]
+    #return Poll.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
+    return Poll.objects.annotate(num_choices=Count('choice')).filter(pub_date__lte=timezone.now(), num_choices__gte=2).order_by('-pub_date')[:5]
 
 class DetailView(generic.DetailView):
   model = Poll
@@ -69,7 +69,8 @@ class DetailView(generic.DetailView):
     """
     Exlcudes any polls that aren't published yet.
     """
-    return Poll.objects.filter(pub_date__lte=timezone.now())
+    #return Poll.objects.filter(pub_date__lte=timezone.now())
+    return Poll.objects.annotate(num_choices=Count('choice')).filter(pub_date__lte=timezone.now(), num_choices__gte=2)
 
 class ResultsView(generic.DetailView):
   model = Poll
